@@ -11,6 +11,7 @@ Based on skeleton code by Abhilash Kuhikar, October 2019
 from logic_IJK import Game_IJK
 import random
 import copy
+import math
 
 # Suggests next move to be played by the current player given the current game
 #
@@ -102,7 +103,9 @@ def successor(game):
     move = ['U', 'D', 'L', 'R']
     return [(copy.deepcopy(game).makeMove(i),i) for i in move]
 
-def min_value(current,future_step):
+def min_value(current,future_step,alpha,beta):
+
+    min_val = math.inf
 
     board = current[0].getGame()
 
@@ -111,14 +114,27 @@ def min_value(current,future_step):
 
         succ = successor(current[0])
 
-        return min(max_value(i,future_step) for i in succ)
+        for i in succ:
+            temp,beta_new = max_value(i,future_step,alpha,beta)
+            if min_val > temp[0]:
+                min_val = temp[0]
+                move = temp[1]
+                beta = beta_new
 
-    
-    #return [corner_heuristic(board,current[0].getCurrentPlayer),current[1]]
-    return [highest_move_heuristic(board,current[0].getCurrentPlayer),current[1]]
+            if alpha >= beta:
+                break
+
+        return [min_val,move],beta
+        #return min(max_value(i,future_step) for i in succ)
+
+    cost = corner_heuristic(board,current[0].getCurrentPlayer)
+    return [cost,current[1]],cost
+    #return [highest_move_heuristic(board,current[0].getCurrentPlayer),current[1]]
     #return [empty_space_heuristic(board),current[1]]
 
-def max_value(current,future_step):
+def max_value(current,future_step,alpha,beta):
+
+    max_val = -math.inf
 
     board = current[0].getGame()
 
@@ -127,9 +143,21 @@ def max_value(current,future_step):
 
         succ = successor(current[0])
 
-        return max(min_value(i,future_step) for i in succ)
+        for i in succ:
+            temp,alpha_new = min_value(i,future_step,alpha,beta)
+            if max_val < temp[0]:
+                max_val = temp[0]
+                move = temp[1]
+                alpha = alpha_new
 
-    return [corner_heuristic(board,current[0].getCurrentPlayer),current[1]]
+            if alpha > beta:
+                break
+
+        return [max_val,move],alpha
+        #return max(min_value(i,future_step) for i in succ)
+
+    cost = corner_heuristic(board,current[0].getCurrentPlayer)
+    return [cost,current[1]],cost
     #return [highest_move_heuristic(board,current[0].getCurrentPlayer),current[1]]
     #return [empty_space_heuristic(board),current[1]] 
 
@@ -140,24 +168,22 @@ def next_move(game: Game_IJK)-> None:
        deterministic: bool -> either True or False, indicating whether the game is deterministic or not
     '''
 
+    beta = math.inf
+    alpha = -math.inf
+
     future_step = 4
 
     board = game.getGame()
     player = game.getCurrentPlayer()
     deterministic = game.getDeterministic()
 
-    # You'll want to put in your fancy AI code here. For right now this just 
-    # returns a random move.
-
     if deterministic:
-
-        #move = random.choice(['U', 'D', 'L', 'R'])
 
         # succ = [game,'move']
         succ = successor(game)
 
-        best = max(min_value(i,future_step) for i in succ)
-        
+        best,c = max(min_value(i,future_step,alpha,beta) for i in succ)
+        print(best[1])
         yield best[1]
 
 
