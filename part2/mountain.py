@@ -11,6 +11,7 @@ from numpy import *
 from scipy.ndimage import filters
 import sys
 import imageio
+from itertools import groupby
 
 # calculate "Edge strength map" of an image
 #
@@ -67,3 +68,90 @@ if __name__ == "__main__":
 
     # output simple end
 
+    # output map begin
+
+    t = transpose(edge_strength)
+    max_values = list(map(max, t))
+    #print(max_values)
+    count = 0
+    ridge = []
+
+    for x in max_values:
+       ridge.append(t[count].tolist().index(x))
+       count += 1
+
+    #print(ridge)
+    red = (255, 0, 0)
+    imageio.imwrite("output_map.jpg", array(draw_edge(input_image, ridge, red, 5)))
+
+    states = []
+    s = 1
+    while s < len(edge_strength):
+        states.append(s)
+        s += 1
+    #print(states)
+
+    initialProbability = ([.10, .15, .20, .25, .30])
+    #transitionProbability = array([[0, .45], [1, .45], [2, .10]])       # assign low probability to pixels farther away
+    emissionProbability = array([.10, .15, .20, .25, .30])
+
+#    transitionProbability = array([
+#        [.1, .1, .1, .1, .1], # pixel 1
+#        [1, .45], # pixel 2
+#        [2, .10]
+#    ])
+
+
+    LS = len(states)
+
+#    sum = 0
+#    for x in emissionProbability:
+#        sum += x
+    #print(sum)
+
+    # assign low probability to pixels farther away
+
+    samePixelPercent = .35
+    nearestPixelPercent = .3
+    otherPixelPercent = .35 / LS
+
+    # populate transition probability matrix
+
+    transitionProbability = zeros((LS, LS))
+    xc = 0
+    yc = 0
+    for x in states:
+        for y in states:
+            if x == y:
+                transitionProbability[xc][yc] = samePixelPercent
+            elif x+1 == y or x-1 == y:
+                transitionProbability[xc][yc] = nearestPixelPercent
+            else:
+                transitionProbability[xc][yc] = otherPixelPercent
+            yc += 1
+        yc = 0
+        xc += 1
+
+#    print(transitionProbability)
+
+    # populate emission probability matrix
+
+    max_strength = max(max_values)
+
+    emissionValues = linspace(0, 1/(int(max_strength)/2), int(max_strength))   # increase probability linearly with strength
+    LE = len(emissionValues)
+
+    xc = 0
+    yc = 0
+    emissionProbability = zeros((LS, LE))
+    for x in states:
+        for y in emissionValues:
+            emissionProbability[xc][yc] = emissionValues[yc]
+            yc += 1
+        yc = 0
+        xc += 1
+
+    #print(emissionProbability)
+
+
+    # output map end
