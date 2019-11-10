@@ -1,6 +1,6 @@
 #!/usr/local/bin/python3
 #
-# Authors: [PLEASE PUT YOUR NAMES AND USER IDS HERE]
+# Authors: Austin Zebrowski
 #
 # Mountain ridge finder
 # Based on skeleton code by D. Crandall, Oct 2019
@@ -36,18 +36,34 @@ def draw_edge(image, y_coordinates, color, thickness):
 
 # main program
 #
-(input_filename, gt_row, gt_col) = sys.argv[1:]
 
-# load in image 
-input_image = Image.open(input_filename)
+if __name__ == "__main__":
 
-# compute edge strength mask
-edge_strength = edge_strength(input_image)
-imageio.imwrite('edges.jpg', uint8(255 * edge_strength / (amax(edge_strength))))
+    (input_filename, gt_row, gt_col) = sys.argv[1:]
 
-# You'll need to add code here to figure out the results! For now,
-# just create a horizontal centered line.
-ridge = [ edge_strength.shape[0]/2 ] * edge_strength.shape[1]
+    # load in image
+    input_image = Image.open(input_filename)
 
-# output answer
-imageio.imwrite("output.jpg", draw_edge(input_image, ridge, (255, 0, 0), 5))
+    # compute edge strength mask
+    edge_strength = edge_strength(input_image)
+    imageio.imwrite('edges.jpg', uint8(255 * edge_strength / (amax(edge_strength))))
+
+    # You'll need to add code here to figure out the results! For now,
+    # just create a horizontal centered line.
+
+    # output simple begin
+
+    t = transpose(edge_strength)
+    max_values = list(map(max, t))
+    count = 0
+    ridge = []
+
+    for x in max_values:
+       ridge.append(t[count].tolist().index(x))
+       count += 1
+
+    blue = (0, 0, 255)
+    imageio.imwrite("output_simple.jpg", array(draw_edge(input_image, ridge, blue, 5)))
+
+    # output simple end
+
