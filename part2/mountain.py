@@ -35,6 +35,90 @@ def draw_edge(image, y_coordinates, color, thickness):
             image.putpixel((x, t), color)
     return image
 
+
+# populate emission probability matrix
+# increase probability linearly with strength
+# numbers multiplied by 100 to prevent numbers from becoming too small
+def get_emission_matrix(max_values, LS):
+
+    max_strength = max(max_values)
+
+    emissionValues = linspace(0, 100/(int(max_strength)/2), int(max_strength))
+    LE = len(emissionValues)
+
+    xc = 0
+    yc = 0
+    emissionProbability = zeros((LS, LE))
+    for x in states:
+        for y in emissionValues:
+            emissionProbability[xc][yc] = emissionValues[yc]
+            yc += 1
+        yc = 0
+        xc += 1
+
+    return emissionProbability
+
+
+# populate transition probability matrix
+# assign low probability to pixels farther away
+# percentages multiplied by 100 to prevent numbers from becoming too small
+def get_transition_matrix(LS):
+
+    samePixelPercent = 40
+    nearestPixelPercent = 40
+    otherPixelPercent = 20 #/ LS
+
+    transitionProbability = zeros((LS+1, LS+1))
+
+    xc = 0
+    yc = 0
+    for x in states:
+        for y in states:
+            if x == y:
+                transitionProbability[xc][yc] = samePixelPercent
+            elif x+1 == y or x-1 == y:
+                transitionProbability[xc][yc] = nearestPixelPercent
+            else:
+                transitionProbability[xc][yc] = otherPixelPercent
+            yc += 1
+        yc = 0
+        xc += 1
+    return transitionProbability
+
+
+def viterbi(transitionProbability, emissionProbability, edge_strength, observations):
+    tps = transitionProbability.shape[0]
+    L = len(observations)
+
+    bestPath = zeros((L, tps))
+    position = zeros((L, tps))
+
+    # set initial probability
+
+    prob = []
+    for x in edge_strength[:, 0]:
+        prob.append(max(emissionProbability[:, int(x)]))
+
+    bestPath[0] = prob
+
+    # get the remaining probabilities
+
+    for x in range(1, L):
+        for y in range(tps - 1):
+            bestPath[x, y] = max(bestPath[x - 1] * transitionProbability[:, y]) * emissionProbability[y, ridge[x]]
+            position[x, y] = argmax(bestPath[x - 1] * transitionProbability[:, y])
+
+    # rewind the states
+
+    states = zeros(L, dtype=int32)
+    states[L - 1] = argmax(position[L - 1])
+    for t in range(L - 2, -1, -1):
+        states[t] = position[t + 1, states[t + 1]]
+
+    print(states)
+    return states
+
+
 # main program
 #
 
@@ -68,90 +152,29 @@ if __name__ == "__main__":
 
     # output simple end
 
+
     # output map begin
 
-    t = transpose(edge_strength)
-    max_values = list(map(max, t))
-    #print(max_values)
-    count = 0
-    ridge = []
-
-    for x in max_values:
-       ridge.append(t[count].tolist().index(x))
-       count += 1
-
-    #print(ridge)
-    red = (255, 0, 0)
-    imageio.imwrite("output_map.jpg", array(draw_edge(input_image, ridge, red, 5)))
+    # get the valid states
 
     states = []
     s = 1
     while s < len(edge_strength):
         states.append(s)
         s += 1
-    #print(states)
-
-    initialProbability = ([.10, .15, .20, .25, .30])
-    #transitionProbability = array([[0, .45], [1, .45], [2, .10]])       # assign low probability to pixels farther away
-    emissionProbability = array([.10, .15, .20, .25, .30])
-
-#    transitionProbability = array([
-#        [.1, .1, .1, .1, .1], # pixel 1
-#        [1, .45], # pixel 2
-#        [2, .10]
-#    ])
-
 
     LS = len(states)
 
-#    sum = 0
-#    for x in emissionProbability:
-#        sum += x
-    #print(sum)
+    # get the probability matrices
 
-    # assign low probability to pixels farther away
+    transitionProbability = get_transition_matrix(LS)
+    emissionProbability = get_emission_matrix(max_values, LS)
 
-    samePixelPercent = .35
-    nearestPixelPercent = .3
-    otherPixelPercent = .35 / LS
+    # run the viterbi algorithm
 
-    # populate transition probability matrix
+    states = viterbi(transitionProbability, emissionProbability, edge_strength, ridge)
 
-    transitionProbability = zeros((LS, LS))
-    xc = 0
-    yc = 0
-    for x in states:
-        for y in states:
-            if x == y:
-                transitionProbability[xc][yc] = samePixelPercent
-            elif x+1 == y or x-1 == y:
-                transitionProbability[xc][yc] = nearestPixelPercent
-            else:
-                transitionProbability[xc][yc] = otherPixelPercent
-            yc += 1
-        yc = 0
-        xc += 1
-
-#    print(transitionProbability)
-
-    # populate emission probability matrix
-
-    max_strength = max(max_values)
-
-    emissionValues = linspace(0, 1/(int(max_strength)/2), int(max_strength))   # increase probability linearly with strength
-    LE = len(emissionValues)
-
-    xc = 0
-    yc = 0
-    emissionProbability = zeros((LS, LE))
-    for x in states:
-        for y in emissionValues:
-            emissionProbability[xc][yc] = emissionValues[yc]
-            yc += 1
-        yc = 0
-        xc += 1
-
-    #print(emissionProbability)
-
+    red = (255, 0, 0)
+    imageio.imwrite("output_map.jpg", array(draw_edge(input_image, states, red, 5)))
 
     # output map end
