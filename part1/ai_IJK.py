@@ -21,6 +21,19 @@ import math
 # This function should analyze the current state of the game and determine the 
 # best move for the current player. It should then call "yield" on that move.
 
+def get_heuristic(board,player):
+    empty_space = empty_space_heuristic(board)
+    corner_score = corner_heuristic(board,player)
+    monotonic_score = monotonic_heuristic(board)
+    adjacent_score = adjacent_heuristic(board)
+
+    max_at_corner = max_corner_heuristic(board,player)
+    weighted_score = weighted_heuristic(board,player)
+    max_tile_score = maximum_tile_heuristic(board,player)
+
+    return empty_space*10 + corner_score*50 + monotonic_score*50 + adjacent_score*100 + max_at_corner*100 
+    #return corner_score
+
 def empty_space_heuristic(board):
 
     empty_space = 0
@@ -40,7 +53,13 @@ def corner_heuristic(board,player):
                 [[0,-1,-2,-3,-4,-5],[1,0,-1,-2,-3,-4],[2,1,0,-1,-2,-3],[3,2,1,0,-1,-2],[4,3,2,1,0,-1],[5,4,3,2,1,0]]
                 ]
 
-    cost = 0
+    gradient1 = [[[2**5,2**4,2**3,2**2,2**1,2**0],[2**4,2**3,2**2,2**1,2**0,-2**1],[2**3,2**2,2**1,2**0,-2**1,-2**2],[2**2,2**1,2**0,-2**1,-2**2,-2**3],[2**1,2**0,-2**1,-2**2,-2**3,-2**4],[2**0,-2**1,-2**2,-2**3,-2**4,-2**5]],
+                [[2**0,2**1,2**2,2**3,2**4,2**5],[-2**1,2**0,2**1,2**2,2**3,2**4],[-2**2,-2**1,2**0,2**1,2**2,2**3],[-2**3,-2**2,-2**1,2**0,2**1,2**2],[-2**4,-2**3,-2**2,-2**1,2**0,2**1],[-2**5,-2**4,-2**3,-2**2,-2**1,2**0]],
+                [[-2**5,-2**4,-2**3,-2**2,-2**1,2**0],[-2**4,-2**3,-2**2,-2**1,2**0,2**1],[-2**3,-2**2,-2**1,2**0,2**1,2**2],[-2**2,-2**1,2**0,2**1,2**2,2**3],[-2**1,2**0,2**1,2**2,2**3,2**4],[2**0,2**1,2**2,2**3,2**4,2**5]],
+                [[2**0,-2**1,-2**2,-2**3,-2**4,-2**5],[2**1,2**0,-2**1,-2**2,-2**3,-2**4],[2**2,2**1,2**0,-2**1,-2**2,-2**3],[2**3,2**2,2**1,2**0,-2**1,-2**2],[2**4,2**3,2**2,2**1,2**0,-2**1],[2**5,2**4,2**3,2**2,2**1,2**0]]
+                ]
+
+    cost = -100000
 
     if player == '-':        
         for l in range(4):
@@ -50,7 +69,7 @@ def corner_heuristic(board,player):
             for i in range(len(board)):
                 for j in range(i):
                     if board[i][j].islower():
-                        temp_cost += gradient[l][i][j]*(ord(board[i][j])-96)
+                        temp_cost += gradient1[l][i][j]*(ord(board[i][j])-96)
 
             if temp_cost > cost:
                 cost = temp_cost
@@ -72,29 +91,96 @@ def corner_heuristic(board,player):
 
 def monotonic_heuristic(board):
 
-    return
+    monotonic_cost = 0
 
-def highest_move_heuristic(board,player):
-    max_cost = 0
-    min_cost = 0
+    for i in range(len(board)-1):
+        for j in range(len(board)-1):
+            if board[i][j] != ' ':
+                if board[i][j].lower() == board[i][j+1].lower():
+                    monotonic_cost += 1
+                if board[i][j].lower() == board[i+1][j].lower():
+                    monotonic_cost += 1 
+
+    return monotonic_cost
+
+def adjacent_heuristic(board):
+
+    adjacent_cost = 0
+
+    for i in range(len(board)-1):
+        for j in range(len(board)-1):
+            if board[i][j] != ' ':
+                adjacent_cost += 26 - abs(ord(board[i][j].lower()) - ord(board[i][j+1].lower()))
+                adjacent_cost += 26 - abs(ord(board[i][j].lower()) - ord(board[i+1][j].lower()))
+
+    return adjacent_cost
+
+def max_corner_heuristic(board,player):
+
+    max_letter = -1
+    idx_i = -1
+    idx_j = -1
+
+    if player == '+':
+        for i in range(len(board)):
+            for j in range(len(board)):
+                if board[i][j].isupper():
+                    if ord(board[i][j]) > max_letter:
+                        max_letter = ord(board[i][j])
+                        idx_i = i
+                        idx_j = j
+
+    else:
+        for i in range(len(board)):
+            for j in range(len(board)):
+                if board[i][j].islower():
+                    if ord(board[i][j]) > max_letter:
+                        max_letter = ord(board[i][j])
+                        idx_i = i
+                        idx_j = j
+    if (i == 0 and j == 0) or (i == 5 and j == 0) or (i == 0 and j == 5) or (i == 5 and j == 5):
+        return 5000
+    else:
+        return -5000 
+
+def weighted_heuristic(board,player):
+    upper_cost = 0
+    lower_cost = 0
     cost = 0
     for i in board:
         for j in i:
             if j.isupper():
-                if max_cost< ord(j):
-                    max_cost = ord(j)
+                upper_cost += ord(j)-64
 
             else:
-                if min_cost<ord(j):
-                    min_cost = ord(j)
+                lower_cost += ord(j)-96
     
     if player == '-':
-        cost = min_cost - max_cost
+        cost = lower_cost - upper_cost
 
     else: 
-        cost = max_cost - min_cost
+        cost = upper_cost - lower_cost
 
     return cost
+
+def maximum_tile_heuristic(board,player):
+    
+    upper_tile = -1
+    lower_tile = -1
+
+    for i in board:
+        for j in i:
+            if j.isupper():
+                if upper_tile < ord(j):
+                    upper_tile = ord(j)
+            else:
+                if lower_tile < ord(j):
+                    lower_tile = ord(j)
+    
+    if player == '-':
+        return lower_tile
+    else:
+        return upper_tile
 
 def future():
     return
@@ -127,7 +213,9 @@ def min_value(current,future_step,alpha,beta):
         return [min_val,move],beta
         #return min(max_value(i,future_step) for i in succ)
 
-    cost = corner_heuristic(board,current[0].getCurrentPlayer)
+    #cost = corner_heuristic(board,current[0].getCurrentPlayer)
+    #cost = weighted_heuristic(board,current[0].getCurrentPlayer)
+    cost = get_heuristic(board,current[0].getCurrentPlayer)
     return [cost,current[1]],cost
     #return [highest_move_heuristic(board,current[0].getCurrentPlayer),current[1]]
     #return [empty_space_heuristic(board),current[1]]
@@ -156,7 +244,9 @@ def max_value(current,future_step,alpha,beta):
         return [max_val,move],alpha
         #return max(min_value(i,future_step) for i in succ)
 
-    cost = corner_heuristic(board,current[0].getCurrentPlayer)
+    #cost = corner_heuristic(board,current[0].getCurrentPlayer)
+    #cost = weighted_heuristic(board,current[0].getCurrentPlayer)
+    cost = get_heuristic(board,current[0].getCurrentPlayer)
     return [cost,current[1]],cost
     #return [highest_move_heuristic(board,current[0].getCurrentPlayer),current[1]]
     #return [empty_space_heuristic(board),current[1]] 
@@ -171,7 +261,7 @@ def next_move(game: Game_IJK)-> None:
     beta = math.inf
     alpha = -math.inf
 
-    future_step = 4
+    future_step = 3
 
     board = game.getGame()
     player = game.getCurrentPlayer()
@@ -179,13 +269,15 @@ def next_move(game: Game_IJK)-> None:
 
     if deterministic:
 
-        # succ = [game,'move']
-        succ = successor(game)
+        if player == '+':
+            # succ = [game,'move']
+            succ = successor(game)
 
-        best,c = max(min_value(i,future_step,alpha,beta) for i in succ)
-        print(best[1])
-        yield best[1]
-
+            best,c = max(min_value(i,future_step,alpha,beta) for i in succ)
+            print(best[1])
+            yield best[1]
+        else:
+            yield random.choice(['U', 'D', 'L', 'R'])            
 
     else:
 
