@@ -31,7 +31,7 @@ def get_heuristic(board,player):
     weighted_score = weighted_heuristic(board,player)
     max_tile_score = maximum_tile_heuristic(board,player)
 
-    return empty_space*10 + corner_score*50 + monotonic_score*50 + adjacent_score*100 + max_at_corner*100 
+    return empty_space*10 + corner_score*50 + monotonic_score*50 + adjacent_score*100
     #return corner_score
 
 def empty_space_heuristic(board):
@@ -274,7 +274,7 @@ def next_move(game: Game_IJK)-> None:
             succ = successor(game)
 
             best,c = max(min_value(i,future_step,alpha,beta) for i in succ)
-            print(best[1])
+            #print(best[1])
             yield best[1]
         else:
             yield random.choice(['U', 'D', 'L', 'R'])            
