@@ -56,4 +56,21 @@ probabilites up by 100. This solved the "0 probability problem", but led to othe
 We found that our transition probability would always dominate the emission probability. 
 This appeared on the image as a line that began on the mountain's border, but then increased
 linearly until it was at the very top of the image. Our next attempt to fix this problem was to use
-logarithms.
+logarithms. However, we were unable to get this to work properly. Ultimately, we were able to confirm
+that our transition and emission probabilities were working, but we were unable to finetune them to 
+get the desired result.
+
+C) Human input
+
+This problem is built on top of part B, and therefore suffers from some of the same problems that we faced 
+in part B. However, were were able to successfully implement a feature that considers human input when 
+determining where to draw a border line. 
+
+To accomplish this, we tweaked the creation of our transition probability matrix. The adjustment that we made
+gives preferential treatment to the point that the user said is on the borderline. In this way, the algorithm
+properly draws a line over the indicated spot.
+
+This implementation can be problematic in the sense that it produces strange outputs when the user chooses a point
+that is completely off the mark. In these cases, the line can "jump" to that spot. The reason for this seems to be
+that the strength of the transition probability overwhelms that of the emission probability. So, we will properly choose
+to create a line along the border until, all of a sudden, we overwhelmingly need to go to one specific point.
