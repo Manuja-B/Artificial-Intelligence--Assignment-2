@@ -23,17 +23,17 @@ import math
 
 def get_heuristic(board,player):
     empty_space = empty_space_heuristic(board)
-    corner_score = corner_heuristic(board,player)
+    gradient_score = gradient_heuristic(board,player)
     monotonic_score = monotonic_heuristic(board)
     adjacent_score = adjacent_heuristic(board)
 
     max_at_corner = max_corner_heuristic(board,player)
     weighted_score = weighted_heuristic(board,player)
     max_tile_score = maximum_tile_heuristic(board,player)
+ 
+    return empty_space*30 #+ adjacent_score*100 + monotonic_score*100 #+ gradient_score*50 + max_at_corner*50 #+ weighted_score*30 + max_tile_score*60
 
-    return empty_space*10 + corner_score*50 + monotonic_score*50 + adjacent_score*100
-    #return corner_score
-
+# Empty tiles heuristic
 def empty_space_heuristic(board):
 
     empty_space = 0
@@ -45,8 +45,10 @@ def empty_space_heuristic(board):
 
     return empty_space
 
-def corner_heuristic(board,player):
+# Gradient heuristic to fix a certain position
+def gradient_heuristic(board,player):
 
+	# 4 variants for each corner
     gradient = [[[5,4,3,2,1,0],[4,3,2,1,0,-1],[3,2,1,0,-1,-2],[2,1,0,-1,-2,-3],[1,0,-1,-2,-3,-4],[0,-1,-2,-3,-4,-5]],
                 [[0,1,2,3,4,5],[-1,0,1,2,3,4],[-2,-1,0,1,2,3],[-3,-2,-1,0,1,2],[-4,-3,-2,-1,0,1],[-5,-4,-3,-2,-1,0]],
                 [[-5,-4,-3,-2,-1,0],[-4,-3,-2,-1,0,1],[-3,-2,-1,0,1,2],[-2,-1,0,1,2,3],[-1,0,1,2,3,4],[0,1,2,3,4,5]],
@@ -64,7 +66,7 @@ def corner_heuristic(board,player):
     if player == '-':        
         for l in range(4):
             
-            temp_cost = 0
+            temp_cost = 0	
 
             for i in range(len(board)):
                 for j in range(i):
@@ -89,6 +91,7 @@ def corner_heuristic(board,player):
 
     return cost
 
+# Heuristic to find the number of similar tiles adjacent to each other
 def monotonic_heuristic(board):
 
     monotonic_cost = 0
@@ -103,6 +106,7 @@ def monotonic_heuristic(board):
 
     return monotonic_cost
 
+# Heuristic to find cost such that adjacent tiles with less difference are given more priority
 def adjacent_heuristic(board):
 
     adjacent_cost = 0
@@ -115,6 +119,7 @@ def adjacent_heuristic(board):
 
     return adjacent_cost
 
+# Heuristic to find the max element on the board at the corner
 def max_corner_heuristic(board,player):
 
     max_letter = -1
@@ -143,6 +148,7 @@ def max_corner_heuristic(board,player):
     else:
         return -5000 
 
+# Heuristic to compare between upper-case and lower-case values
 def weighted_heuristic(board,player):
     upper_cost = 0
     lower_cost = 0
@@ -150,10 +156,10 @@ def weighted_heuristic(board,player):
     for i in board:
         for j in i:
             if j.isupper():
-                upper_cost += ord(j)-64
+                upper_cost += 2**(ord(j)-64)
 
-            else:
-                lower_cost += ord(j)-96
+            if j.islower():
+                lower_cost += 2**(ord(j)-96)
     
     if player == '-':
         cost = lower_cost - upper_cost
@@ -163,6 +169,7 @@ def weighted_heuristic(board,player):
 
     return cost
 
+# Heuristic to find the max-tile on the board
 def maximum_tile_heuristic(board,player):
     
     upper_tile = -1
@@ -173,7 +180,7 @@ def maximum_tile_heuristic(board,player):
             if j.isupper():
                 if upper_tile < ord(j):
                     upper_tile = ord(j)
-            else:
+            if j.islower():
                 if lower_tile < ord(j):
                     lower_tile = ord(j)
     
@@ -182,13 +189,20 @@ def maximum_tile_heuristic(board,player):
     else:
         return upper_tile
 
-def future():
-    return
-
+# Successor Function
+# Returns all the 4 successors of the board
 def successor(game):
     move = ['U', 'D', 'L', 'R']
-    return [(copy.deepcopy(game).makeMove(i),i) for i in move]
 
+    succ = []
+
+    for i in move:
+    	temp = game.makeMove(i)
+    	succ.append((temp,i))
+    #return [(copy.deepcopy(game).makeMove(i),i) for i in move]
+    return succ
+
+# MIN Player
 def min_value(current,future_step,alpha,beta):
 
     min_val = math.inf
@@ -211,15 +225,12 @@ def min_value(current,future_step,alpha,beta):
                 break
 
         return [min_val,move],beta
-        #return min(max_value(i,future_step) for i in succ)
 
-    #cost = corner_heuristic(board,current[0].getCurrentPlayer)
-    #cost = weighted_heuristic(board,current[0].getCurrentPlayer)
+    # When at the leaf node
     cost = get_heuristic(board,current[0].getCurrentPlayer)
     return [cost,current[1]],cost
-    #return [highest_move_heuristic(board,current[0].getCurrentPlayer),current[1]]
-    #return [empty_space_heuristic(board),current[1]]
 
+# MAX Player
 def max_value(current,future_step,alpha,beta):
 
     max_val = -math.inf
@@ -242,15 +253,13 @@ def max_value(current,future_step,alpha,beta):
                 break
 
         return [max_val,move],alpha
-        #return max(min_value(i,future_step) for i in succ)
 
-    #cost = corner_heuristic(board,current[0].getCurrentPlayer)
-    #cost = weighted_heuristic(board,current[0].getCurrentPlayer)
+    # When at the leaf node
     cost = get_heuristic(board,current[0].getCurrentPlayer)
     return [cost,current[1]],cost
-    #return [highest_move_heuristic(board,current[0].getCurrentPlayer),current[1]]
-    #return [empty_space_heuristic(board),current[1]] 
 
+
+# Calling Function
 def next_move(game: Game_IJK)-> None:
 
     '''board: list of list of strings -> current state of the game
@@ -261,26 +270,19 @@ def next_move(game: Game_IJK)-> None:
     beta = math.inf
     alpha = -math.inf
 
-    future_step = 3
+    # depth
+    future_step = 4
 
     board = game.getGame()
     player = game.getCurrentPlayer()
     deterministic = game.getDeterministic()
 
-    if deterministic:
+    if player == '+':
+        # succ = [game,'move']
+        succ = successor(game)
 
-        if player == '+':
-            # succ = [game,'move']
-            succ = successor(game)
-
-            best,c = max(min_value(i,future_step,alpha,beta) for i in succ)
-            #print(best[1])
-            yield best[1]
-        else:
-            yield random.choice(['U', 'D', 'L', 'R'])            
+        best,c = max(min_value(i,future_step,alpha,beta) for i in succ)
+        yield best[1]
 
     else:
-
         yield random.choice(['U', 'D', 'L', 'R'])
-
-
