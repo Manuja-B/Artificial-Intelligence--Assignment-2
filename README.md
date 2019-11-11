@@ -79,11 +79,12 @@ We use this to reduce time, by finding the optimal minimax solution while avoidi
 2. Assign initial values of alpha and beta to roots
 3. Prune the nodes for following conditions:
 
-Beta \&lt;= alpha of max ancestors
+Beta &lt; alpha of max ancestors
 
-Alpha \&gt;= beta of min ancestors
+Alpha &gt; beta of min ancestors
 
-## Heuristic function: Heuristic function plays the most important thing in the search algorithms. They are the deciding factor for the direction of the move. We have used various different heuristic functions and are used with different weights. The details are-
+## Heuristic function:
+Heuristic function plays the most important thing in the search algorithms. They are the deciding factor for the direction of the move. We have used various different heuristic functions and are used with different weights. The details are-
 
 1. **Empty tile heuristic-** This function provides the number of empty tiles on the board. So, the idea is if there are more empty positions on the board the chances of winning increase in the future, as more and more space to play will be available.
 2. **Gradient Heuristic:** While playing the game, we analyzed that it would be better if the higher letters are acquired in the corner and the following letters should subsequently decrease. So, we created a gradient structure that is multiplied by our board, to get a score. Each board is tested for 4 gradients(priority to each different corner) and the max one is selected.
