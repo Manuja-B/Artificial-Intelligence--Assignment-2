@@ -79,9 +79,9 @@ We use this to reduce time, by finding the optimal minimax solution while avoidi
 2. Assign initial values of alpha and beta to roots
 3. Prune the nodes for following conditions:
 
-Beta &lt; alpha of max ancestors
+Beta &le; alpha of max ancestors
 
-Alpha &gt; beta of min ancestors
+Alpha &ge; beta of min ancestors
 
 ## Heuristic function:
 Heuristic function plays the most important thing in the search algorithms. They are the deciding factor for the direction of the move. We have used various different heuristic functions and are used with different weights. The details are-
