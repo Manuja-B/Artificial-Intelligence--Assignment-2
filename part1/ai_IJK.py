@@ -31,7 +31,7 @@ def get_heuristic(board,player):
     weighted_score = weighted_heuristic(board,player)
     max_tile_score = maximum_tile_heuristic(board,player)
  
-    return empty_space*30 #+ adjacent_score*100 + monotonic_score*100 #+ gradient_score*50 + max_at_corner*50 #+ weighted_score*30 + max_tile_score*60
+    return empty_space*3 + adjacent_score*8 + monotonic_score*10 + max_at_corner*5 + gradient_score*10  #+ weighted_score*3 + max_tile_score*6
 
 # Empty tiles heuristic
 def empty_space_heuristic(board):
@@ -192,7 +192,7 @@ def maximum_tile_heuristic(board,player):
 # Successor Function
 # Returns all the 4 successors of the board
 def successor(game):
-    move = ['U', 'D', 'L', 'R']
+    move = ['U', 'L', 'D', 'R']
 
     succ = []
 
@@ -268,10 +268,10 @@ def next_move(game: Game_IJK)-> None:
     '''
 
     beta = math.inf
-    alpha = -math.inf
+    alpha = -1*math.inf
 
     # depth
-    future_step = 4
+    future_step = 3
 
     board = game.getGame()
     player = game.getCurrentPlayer()
@@ -285,4 +285,4 @@ def next_move(game: Game_IJK)-> None:
         yield best[1]
 
     else:
-        yield random.choice(['U', 'D', 'L', 'R'])
+        yield random.choice(['U', 'L', 'D', 'R'])
