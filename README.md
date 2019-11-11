@@ -53,7 +53,7 @@ It provides all the next possible states, from the current position on the board
 
 •        MINIMAX-Decision(S)
 
-Return action leading to state S&#39;SUCC(S) that maximizes MIN-Value(S&#39;)
+         Return action leading to state S&#39;SUCC(S) that maximizes MIN-Value(S&#39;)
 
 •        MAX-Value(S)
 
