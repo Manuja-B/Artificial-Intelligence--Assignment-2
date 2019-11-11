@@ -1,6 +1,6 @@
-**Elements of Artificial Intelligence Assignment 2**
+#**Elements of Artificial Intelligence Assignment 2**
 
-**Part 1: IJK**
+##**Part 1: IJK**
 
 **{We have made an assumption that, &#39;+&#39; player will play using MiniMax, and &#39;-&#39; player will play randomly. Because, to find the best possible strength of the algorithm we have to make other player weak. If we would have given both the AI same power, there is a great chance that game might end up in a draw.}**
 
@@ -12,7 +12,7 @@ Deterministic is that the position for the next character is fixed, it finds the
 
 To implement this, we have used &#39;Minimax&#39; algorithm using &#39;Alpha-Beta Pruning&#39;. By using minimax algorithm we choose an optimal move for a player assuming that the other player is also playing optimally.
 
-**Initial State:**
+##**Initial State:**
 
 Initial state is a board given with one move placed on the board according to the game variant{deterministic or non-deterministic}. This is specified by how the game is set up at the start and who plays the first move. The combination could be as follows:
 
@@ -21,11 +21,11 @@ Initial state is a board given with one move placed on the board according to th
 3. Human AI
 4. AI Human
 
-**Terminal State:**
+##**Terminal State:**
 
 When either one of the players wins i.e.the player who has maximum value (&#39;K&#39; for + Player, &#39;k&#39; for - Player) is the winner. If none of the player reaches the maximum state then whoever has the max. wins. Or, if some player has forfeited the match, the other player is the winner. Or else there is a tie, and nobody is a winner.
 
-**Actions:**
+##**Actions:**
 
 It will return the set of legal moves in a state space. For this problem actions could be Up(U), Left(L), Down(D) and Right(R).
 
@@ -45,7 +45,7 @@ It will return the set of legal moves in a state space. For this problem actions
 
 **Step 5** : Select move toward min node that has largest utility value
 
-**Algorithm**
+##**Algorithm**
 
 •        MINIMAX-Decision(S)
 
@@ -63,7 +63,7 @@ Return action leading to state S&#39;SUCC(S) that maximizes MIN-Value(S&#39;)
 
         Else return minS&#39;SUCC(S) MAX-Value(S&#39;)
 
-**Alpha-Beta Pruning:** We use this to reduce time, by finding the optimal minimax solution while avoiding searching subtrees of moves which won&#39;t be selected. In an average case time complexity is reduced from (O
+##**Alpha-Beta Pruning:** We use this to reduce time, by finding the optimal minimax solution while avoiding searching subtrees of moves which won&#39;t be selected. In an average case time complexity is reduced from (O
 
 # b/d
 ) to (O
@@ -82,7 +82,7 @@ Beta \&lt;= alpha of max ancestors
 
 Alpha \&gt;= beta of min ancestors
 
-  **Heuristic function:** Heuristic function plays the most important thing in the search algorithms. They are the deciding factor for the direction of the move. We have used various different heuristic functions and are used with different weights. The details are-
+##**Heuristic function:** Heuristic function plays the most important thing in the search algorithms. They are the deciding factor for the direction of the move. We have used various different heuristic functions and are used with different weights. The details are-
 
 1. **Empty tile heuristic-** This function provides the number of empty tiles on the board. So, the idea is if there are more empty positions on the board the chances of winning increase in the future, as more and more space to play will be available.
 2. **Gradient Heuristic:** While playing the game, we analyzed that it would be better if the higher letters are acquired in the corner and the following letters should subsequently decrease. So, we created a gradient structure that is multiplied by our board, to get a score. Each board is tested for 4 gradients(priority to each different corner) and the max one is selected.
@@ -92,13 +92,13 @@ Alpha \&gt;= beta of min ancestors
 6. **Weighted Score** : This heuristic relies on the fact that, if in two consecutive moves the sum of all my weighted characters subtracted from the same of other player&#39;s characters increases, then there is an intuition that I am moving in the right direction.
 7. **Max\_tile\_score** : This heuristic states that if in certain move I am able to increase my highest character, then I am moving in the right direction towards the goal.(though not that much impactful)
 
-**Problems we faced:**
+##**Problems we faced:**
 
 - So, the biggest problem was to find the best combination of the heuristic measures, to generate a combined value. We tried several combinations, at some point we felt that a particular heuristic has less value, but other point you feel that, no it is actually very important. So, we comment that every heuristic is important, even if there is never an end to the heuristic functions. It&#39;s always a problem to find an improving combination.
 - Whine implementing the gradient heuristic, we were assigning weights in linear fashion to the increasing values of the alphabet, but this seems to not work properly, as 2 &#39;s will be weighted the same as 1 b in that. So, we introduced an exponential weight base, so as to remove the conflict.
 - We weren&#39;t able to find a more accurate algorithm to solve the non-deterministic approach. As both deterministic and non-deterministic, were able to play the same algorithm. We thought of implementing &quot;Expectiminimax&quot;, due to the factor of chance in the non-deterministic approach. But, due to the time constraints and the complexity of the algorithms we refrained from doing it.
 
-**Few Suggestions for more fun in the game:**
+##**Few Suggestions for more fun in the game:**
 
 - What if the move is placed at the worst possible position. In this case the AI will have a hard time winning and it&#39;s utility is tested best.
 - It can be a little fun if the user is allowed to place the tile, at desired position, this can be viewed as the opposite of the previous point.
