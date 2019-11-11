@@ -1,6 +1,6 @@
 #!/usr/local/bin/python3
 #
-# Authors: Austin Zebrowski
+# Authors: Authors: Austin Zebrowski:azebrows, Manuja Bandal: msbandal,  Divyanshu Jhawar: djhawar
 #
 # Mountain ridge finder
 # Based on skeleton code by D. Crandall, Oct 2019
