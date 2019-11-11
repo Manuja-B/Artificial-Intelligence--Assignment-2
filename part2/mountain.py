@@ -55,14 +55,13 @@ def get_emission_matrix(max_values, LS):
             yc += 1
         yc = 0
         xc += 1
-
     return emissionProbability
 
 
 # populate transition probability matrix
 # assign low probability to pixels farther away
 # percentages multiplied by 100 to prevent numbers from becoming too small
-def get_transition_matrix(LS):
+def get_transition_matrix(LS, runtype, gt_row, gt_col):
 
     samePixelPercent = 40
     nearestPixelPercent = 40
@@ -74,12 +73,22 @@ def get_transition_matrix(LS):
     yc = 0
     for x in states:
         for y in states:
-            if x == y:
-                transitionProbability[xc][yc] = samePixelPercent
-            elif x+1 == y or x-1 == y:
-                transitionProbability[xc][yc] = nearestPixelPercent
+            if runtype == "human":
+                if xc == int(gt_row) and yc == int(gt_col):
+                    transitionProbability[xc][yc] = 41
+                elif x == y:
+                    transitionProbability[xc][yc] = samePixelPercent
+                elif x+1 == y or x-1 == y:
+                    transitionProbability[xc][yc] = nearestPixelPercent
+                else:
+                    transitionProbability[xc][yc] = otherPixelPercent
             else:
-                transitionProbability[xc][yc] = otherPixelPercent
+                if x == y:
+                    transitionProbability[xc][yc] = samePixelPercent
+                elif x+1 == y or x-1 == y:
+                    transitionProbability[xc][yc] = nearestPixelPercent
+                else:
+                    transitionProbability[xc][yc] = otherPixelPercent
             yc += 1
         yc = 0
         xc += 1
@@ -115,7 +124,7 @@ def viterbi(transitionProbability, emissionProbability, edge_strength, observati
     for t in range(L - 2, -1, -1):
         states[t] = position[t + 1, states[t + 1]]
 
-    print(states)
+    #print(states)
     return states
 
 
@@ -167,7 +176,7 @@ if __name__ == "__main__":
 
     # get the probability matrices
 
-    transitionProbability = get_transition_matrix(LS)
+    transitionProbability = get_transition_matrix(LS, "none", gt_row, gt_col)
     emissionProbability = get_emission_matrix(max_values, LS)
 
     # run the viterbi algorithm
@@ -178,3 +187,25 @@ if __name__ == "__main__":
     imageio.imwrite("output_map.jpg", array(draw_edge(input_image, states, red, 5)))
 
     # output map end
+
+    # human input begin
+
+    states = []
+    s = 1
+    while s < len(edge_strength):
+        states.append(s)
+        s += 1
+
+    LS = len(states)
+
+    transitionProbability = get_transition_matrix(LS, "human", gt_row, gt_col)
+    emissionProbability = get_emission_matrix(max_values, LS)
+
+    # run the viterbi algorithm
+
+    states = viterbi(transitionProbability, emissionProbability, edge_strength, ridge)
+
+    green = (0, 255, 0)
+    imageio.imwrite("output_human.jpg", array(draw_edge(input_image, states, green, 5)))
+
+    # human input end
