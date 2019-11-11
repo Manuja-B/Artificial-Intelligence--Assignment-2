@@ -18,8 +18,8 @@ Initial state is a board given with one move placed on the board according to th
 
 1. AI vs AI
 2. Human vs Human
-3. Human AI
-4. AI Human
+3. Human vs AI
+4. AI vs Human
 
 ### Terminal State:
 
